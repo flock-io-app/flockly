@@ -7,7 +7,7 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: white) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
@@ -17,5 +17,27 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Gilroy, Arial, Helvetica, sans-serif;
+}
+th {
+  @apply rounded-lg;
+}
+.filterable:hover {
+  @apply bg-FlockGrey;
+}
+
+.node-row:hover {
+  @apply bg-FlockGrey;
+}
+@font-face {
+  font-family: "Gilroy";
+  src: url("../../public/Gilroy Font/gilroy-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Gilroy";
+  src: url("../../public/Gilroy Font/gilroy-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
 }
