@@ -1,13 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Header, RadioButtonGroup, Tooltip } from "./components";
+import { Header, RadioButtonGroup, NodeDetailsSidePanel, Tooltip } from "./components";
 import { NodeType, Tabs } from "./types";
 
-import dynamic from "next/dynamic";
-
-const RewardChart = dynamic(() => import("./components/RewardChart"), {
-  ssr: false,
-});
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeType>();
@@ -52,7 +47,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-800 px-5 overflow-hidden">
+    <div className="flex flex-col h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
       <div className="flex justify-center w-full my-5">
         <RadioButtonGroup
@@ -62,7 +57,7 @@ export default function Home() {
         />
       </div>
 
-      <div className=" flex flex-row mt-5 border-t-2 rounded-t-xl bg-zinc-900 h-full pt-10">
+      <div className="flex flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
         <div className="h-fit grid grid-cols-5 gap-y-5 m-2 px-5">
           {TABLE_HEADERS.map((header, index) => {
             return (
@@ -124,63 +119,12 @@ export default function Home() {
     </div>
   );
 }
-interface NodeDetailsSidePanelProps {
-  node?: NodeType;
-}
-const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
-  node,
-}) => {
-  return (
-    <div className="flex flex-col h-fit px-10">
-      <div className="flex flex-row">
-        <div className="flex flex-row w-32">
-          <div className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap">
-            {node?.address}
-          </div>
-          <div className="w-fit justify-center">
-            <button className="h-5 w-5 bg-[url('/images/copy_white.jpg')] bg-cover hover:bg-gray"></button>
-          </div>
-        </div>
-      </div>
-      <div>
-        <RewardChart />
-      </div>
 
-      <div className="flex flex-row justify-between h-fit w-full">
-        <div className="additional-info-cell">
-          Tasked Contributed: {node?.taskContributed}
-        </div>
-        <div className="additional-info-cell">
-          Reward Received: {node?.rewardReceived}
-        </div>
-        <div className="additional-info-cell">
-          Delegated Coins: {node?.delegatedCoins}
-        </div>
-      </div>
-
-      <div className="flex flex-col">
-        <div className="flex flex-row justify-between">
-          <div>History</div>
-          <div>Actions</div>
-        </div>
-        <div className="flex flex-col">
-          {node?.history.map((hist, index) => {
-            return (
-              <div key={index} className="">
-                <div>{hist}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const MOCK_NODES_TRAINERS = [
   {
     name: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    history: ["hist1"],
+    history: ["hist1", "hist2", "hist3"],
     taskContributed: 10,
     rewardReceived: 40,
     delegatedCoins: 100,
