@@ -10,7 +10,17 @@ import {
 } from "recharts";
 import { TimeRangeSelector } from ".";
 
-export const RewardChart = () => {
+interface RewardChartProps {
+  width?: number;
+  secondary?: boolean;
+  graphData: any;
+}
+
+export const RewardChart: React.FC<RewardChartProps> = ({
+  width,
+  secondary,
+  graphData,
+}) => {
   const [data, setData] = useState<RewardDataType[]>(
     Array.from({ length: 100 }, (_, i) => ({
       name: i.toString(),
@@ -20,17 +30,22 @@ export const RewardChart = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState("12m");
 
+  console.log("graphData", data);
+
   useEffect(() => {
     const days =
       selectedTimeRange === "3m" ? 90 : selectedTimeRange === "6m" ? 180 : 365;
-    const MOCK_DATA = Array.from({ length: days }, (_, i) => ({
-      name: (i + 1).toString(),
-      value: Math.floor(Math.log(i + 1) * 1000),
-    }));
-    console.log(MOCK_DATA);
-    setData(MOCK_DATA);
+
+    setData(
+      graphData.slice(0, days).map((item: any, index: number) => ({
+        name: index.toString(),
+        value: item.value,
+        secondary: item?.secondary,
+      }))
+    );
+
     setLoading(false);
-  }, [selectedTimeRange]);
+  }, [selectedTimeRange, graphData]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -42,19 +57,23 @@ export const RewardChart = () => {
     }
   };
 
+  const formatXAxis = (value: string, index: number) => {
+    return index % 7 === 0 ? value : "";
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="flex flex-col" style={{ width: "100%", height: "400px"}}>
+    <div className="flex flex-col" style={{ width: "100%", height: "400px" }}>
       <TimeRangeSelector
         onSelect={(timeStamp) => setSelectedTimeRange(timeStamp)}
       />
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           height={400}
-          width={870}
+          width={width ? width : 870}
           data={data}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
@@ -63,9 +82,17 @@ export const RewardChart = () => {
               <stop offset="5%" stopColor="#eab308" stopOpacity={0.8} />
               <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
             </linearGradient>
+            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+            </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="0" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontWeight: "bold" }} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontWeight: "bold" }}
+            tickFormatter={formatXAxis}
+          />
           <YAxis tick={{ fontWeight: "bold" }} tickFormatter={formatNumber} />
           <Tooltip
             contentStyle={{
@@ -83,6 +110,15 @@ export const RewardChart = () => {
             fillOpacity={1}
             fill="url(#colorUv)"
           />
+          {secondary ? (
+            <Area
+              type="monotone"
+              dataKey="secondary"
+              stroke="#10b981"
+              fillOpacity={1}
+              fill="url(#colorPv)"
+            />
+          ) : null}
         </AreaChart>
       </ResponsiveContainer>
     </div>
