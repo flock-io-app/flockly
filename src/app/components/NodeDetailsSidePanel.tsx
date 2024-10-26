@@ -4,18 +4,20 @@ import { RewardChart } from ".";
 
 interface NodeDetailsSidePanelProps {
   node?: NodeType;
+  graphData: any;
 }
 
 const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
   node,
+  graphData,
 }) => {
   return (
     <div className="flex flex-col h-fit px-10 gap-y-5">
       <div className="flex flex-row bg-zinc-900 rounded-xl py-2 px-5">
         {node?.address}
       </div>
-      <div className="mb-16" style={{marginLeft: "-40px"}}>
-        <RewardChart />
+      <div className="mb-16" style={{ marginLeft: "-40px" }}>
+        <RewardChart graphData={graphData} /> 
       </div>
 
       <div className="flex flex-row justify-between h-fit w-full">

@@ -1,8 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Header, RadioButtonGroup, NodeDetailsSidePanel, Tooltip } from "./components";
+import {
+  Header,
+  RadioButtonGroup,
+  NodeDetailsSidePanel,
+  Tooltip,
+} from "./components";
 import { NodeType, Tabs } from "./types";
-
+import { RewardChart } from "./components";
+import { Area } from "recharts";
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeType>();
@@ -13,6 +19,20 @@ export default function Home() {
   const [currentSortKey, setCurrentSortKey] = useState<keyof NodeType>("rank");
   const [sortAsc, setSortAsc] = useState<boolean>(false);
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
+  const [mainGraphData, setMainGraphData] = useState<any[]>([]);
+  const [detailsGraphData, setDetailsGraphData] = useState<any[]>([]);
+
+  const cumSum = (arr: number[]) => {
+    return arr.reduce((acc: number[], num, i) => {
+      if (i === 0) {
+        acc.push(num);
+      } else {
+        acc.push(num + acc[i - 1]);
+      }
+      return acc;
+    }, []);
+  };
+
   useEffect(() => {
     if (currentlySelectedTab.tab === "TRAINER") {
       setNodes(MOCK_NODES_TRAINERS);
@@ -22,13 +42,34 @@ export default function Home() {
       setSelectedNode(MOCK_NODES_VALIDATORS[0]);
     }
     handleSort(currentSortKey);
+
+    const nums1 = [0].concat(
+      Array.from({ length: 365 }, (_, i) => Math.exp(Math.random() * 25))
+    );
+    const nums2 = [0].concat(
+      Array.from({ length: 365 }, (_, i) => Math.exp(Math.random() * 25))
+    );
+
+    setDetailsGraphData(
+      cumSum(nums1).map((i) => ({
+        name: (i + 1).toString(),
+        value: i,
+      }))
+    );
+
+    setMainGraphData(
+      cumSum(nums2).map((i, idx) => ({
+        name: (i + 1).toString(),
+        value: cumSum(nums1)[idx],
+        secondary: i,
+      }))
+    );
   }, [currentlySelectedTab, currentSortKey]);
 
   const radioButtonsHandler = (buttonId: Tabs) => {
     setCurrentlySelectedTab(buttonId);
     setSortAsc(false);
     setCurrentSortKey("rank");
-    // handleSort(currentSortKey);
   };
   const handleSort = (sortKey: keyof NodeType) => {
     if (currentSortKey === sortKey) {
@@ -49,6 +90,9 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
+      <div style={{ marginLeft: "-40px" }} className="mb-20 mt-5">
+        <RewardChart graphData={mainGraphData} width={1550} secondary={true} />
+      </div>
       <div className="flex justify-center w-full my-5">
         <RadioButtonGroup
           buttonsConfig={BUTTON_CONFIG}
@@ -112,14 +156,16 @@ export default function Home() {
 
         <div></div>
         <div className="w-3/5">
-          <NodeDetailsSidePanel node={selectedNode} />
+          <NodeDetailsSidePanel
+            node={selectedNode}
+            graphData={detailsGraphData}
+          />
         </div>
       </div>
       {tooltipVisible && <Tooltip content="Click to copy to clipboard" />}
     </div>
   );
 }
-
 
 const MOCK_NODES_TRAINERS = [
   {
