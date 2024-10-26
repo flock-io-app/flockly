@@ -23,7 +23,7 @@ const RadioButtonGroup: React.FC<RadioButtonGroupProps> = ({
           return (
             <div
               key={index}
-              className={`${
+              className={`text-xl py-5 cursor-pointer ${
                 selectedButton === config.id ? "selected" : "radio-button"
               } p-2`}
               onClick={() => radioButtonHandler({ tab: config.id } as Tabs)}

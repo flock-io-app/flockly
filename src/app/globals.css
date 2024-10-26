@@ -4,7 +4,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #d6d3d3;
 }
 
 @media (prefers-color-scheme: white) {
@@ -21,27 +21,36 @@ body {
 }
 
 .filterable:hover {
-  @apply bg-FlockGrey;
+  @apply bg-zinc-800;
 }
 
 .node-row:hover {
-  @apply bg-FlockGrey;
+  @apply bg-zinc-800;
 }
 
 .selected {
-  @apply bg-FlockBlue text-FlockWhite rounded-lg outline outline-FlockBlack;
+  @apply text-yellow-500 font-bold border-b-4 border-yellow-500;
 }
 
 .radio-button {
-  @apply text-FlockBlue;
+  @apply text-gray-400 font-bold border-gray-500;
 }
 .radio-button:hover {
-  @apply rounded-lg outline outline-FlockBlue;
+  @apply rounded-lg;
 }
 
 .node-table-cell {
   @apply w-28;
 }
+
+.additional-info-cell {
+  @apply w-full h-fit py-5 rounded-xl justify-center items-center text-center font-bold;
+}
+
+.additional-info-cell:hover {
+  @apply bg-zinc-800 text-yellow-500;
+}
+
 
 @font-face {
   font-family: "Gilroy";

@@ -1,7 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Header, RadioButtonGroup } from "./components";
 import { NodeType, Tabs } from "./types";
+import dynamic from "next/dynamic";
+
+const RewardChart = dynamic(() => import("./components/RewardChart"), {
+  ssr: false,
+});
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeType>();
@@ -13,9 +18,12 @@ export default function Home() {
   useEffect(() => {
     if (currentlySelectedTab.tab === "TRAINER") {
       setNodes(MOCK_NODES_TRAINERS);
+      setSelectedNode(MOCK_NODES_TRAINERS[0]);
     } else {
       setNodes(MOCK_NODES_VALIDATORS);
+      setSelectedNode(MOCK_NODES_VALIDATORS[0]);
     }
+    
   }, [currentlySelectedTab]);
 
   const radioButtonsHandler = (buttonId: Tabs) => {
@@ -23,7 +31,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-zinc-800 px-5 overflow-hidden">
       <Header />
       <div className="flex justify-center w-full my-5">
         <RadioButtonGroup
@@ -33,8 +41,8 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-row mt-5 border-t-2 rounded-t-xl">
-        <div className={`grid grid-cols-5`}>
+      <div className="flex flex-row mt-5 border-t-2 rounded-t-xl bg-zinc-900 h-full pt-10">
+        <div className="grid grid-cols-5 px-5 border-r-2">
           {TABLE_HEADERS.map((header, index) => {
             return (
               <div
@@ -52,7 +60,7 @@ export default function Home() {
                 return (
                   <div
                     key={index}
-                    className={`col-span-5 grid grid-cols-5 hover:bg-FlockGrey py-2 text-center`}
+                    className={`col-span-5 grid grid-cols-5 hover:bg-zinc-800 py-2 text-center`}
                     onClick={() => setSelectedNode(node)}
                   >
                     <div className="node-table-cell">{node.rank}</div>
@@ -61,7 +69,7 @@ export default function Home() {
                         {node.address}
                       </div>
                       <div className="w-fit justify-center">
-                        <button className="h-5 w-5 bg-[url('/images/copy.png')] bg-cover hover:bg-gray"></button>
+                        <button className="h-5 w-5 bg-[url('/images/copy_white.jpg')] bg-cover hover:bg-gray"></button>
                       </div>
                     </div>
                     <div className="node-table-cell">
@@ -77,17 +85,57 @@ export default function Home() {
 
         <div></div>
         <div className="w-3/5">
-          <NodeDetailsModal node={selectedNode} />
+          <NodeDetailsSidePanel node={selectedNode} />
         </div>
       </div>
     </div>
   );
 }
-interface NodeDetailsModalProps {
+interface NodeDetailsSidePanelProps {
   node?: NodeType;
 }
-const NodeDetailsModal: React.FC<NodeDetailsModalProps> = ({ node }) => {
-  return <div>{node?.name}</div>;
+const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
+  node,
+}) => {
+  return (
+    <div className="flex flex-col h-fit px-10">
+      <div className="flex flex-row">
+        <div className="flex flex-row w-32">
+          <div className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap">
+            {node?.address}
+          </div>
+          <div className="w-fit justify-center">
+            <button className="h-5 w-5 bg-[url('/images/copy_white.jpg')] bg-cover hover:bg-gray"></button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <RewardChart />
+      </div>
+
+      <div className="flex flex-row justify-between h-fit w-full">
+        <div className="additional-info-cell">Tasked Contributed: {node?.taskContributed}</div>
+        <div className="additional-info-cell">Reward Received: {node?.rewardReceived}</div>
+        <div className="additional-info-cell">Delegated Coins: {node?.delegatedCoins}</div>
+      </div>
+
+      <div className="flex flex-col">
+        <div className="flex flex-row justify-between">
+          <div>History</div>
+          <div>Actions</div>
+        </div>
+        <div className="flex flex-col">
+          {node?.history.map((hist, index) => {
+            return (
+              <div key={index} className="">
+                <div>{hist}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const MOCK_NODES_TRAINERS = [
