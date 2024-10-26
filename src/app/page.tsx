@@ -115,7 +115,7 @@ export default function Home() {
         </div>
 
         <div></div>
-        <div className="w-3/5 border-l-2">
+        <div className="w-3/5">
           <NodeDetailsSidePanel node={selectedNode} />
         </div>
       </div>
