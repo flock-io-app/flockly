@@ -169,6 +169,15 @@ const MOCK_NODES_VALIDATORS = [
     address: "18fvFWvmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
     rank: 2,
   },
+  {
+    name: "18fvFWvmAfdfdbHPMVQ3ZcJNmMPRa3zt6sETS",
+    history: ["hist1"],
+    taskContributed: 6,
+    rewardReceived: 230,
+    delegatedCoins: 130,
+    address: "18fvFWvdfdmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
+    rank: 3,
+  },
 ];
 
 const TABLE_HEADERS = [
