@@ -14,6 +14,8 @@ export default function Home() {
   const [currentlySelectedTab, setCurrentlySelectedTab] = useState<Tabs>({
     tab: "TRAINER",
   });
+  const [currentSortKey, setCurrentSortKey] = useState<keyof NodeType>("rank");
+  const [sortAsc, setSortAsc] = useState<boolean>(false);
 
   useEffect(() => {
     if (currentlySelectedTab.tab === "TRAINER") {
@@ -23,11 +25,29 @@ export default function Home() {
       setNodes(MOCK_NODES_VALIDATORS);
       setSelectedNode(MOCK_NODES_VALIDATORS[0]);
     }
-    
-  }, [currentlySelectedTab]);
-
+    handleSort(currentSortKey);
+  }, [currentlySelectedTab, currentSortKey]);
+  
   const radioButtonsHandler = (buttonId: Tabs) => {
     setCurrentlySelectedTab(buttonId);
+    setSortAsc(false);
+    setCurrentSortKey("rank");
+    // handleSort(currentSortKey);
+  };
+  const handleSort = (sortKey: keyof NodeType) => {
+    if (currentSortKey === sortKey) {
+      setSortAsc((prevSortAsc) => !prevSortAsc);
+    } else {
+      setCurrentSortKey(sortKey);
+      setSortAsc(false);
+    }
+    nodes?.sort((a: NodeType, b: NodeType) => {
+      if (sortAsc) {
+        return (b[sortKey] as number) - (a[sortKey] as number);
+      } else {
+        return (a[sortKey] as number) - (b[sortKey] as number);
+      }
+    });
   };
 
   return (
@@ -48,10 +68,16 @@ export default function Home() {
               <div
                 key={index}
                 className={`node-table-cell justify-center items-center text-center ${
-                  header.filter ? "filterable" : ""
+                  header.filter ? "filterable cursor-pointer" : ""
                 } rounded-lg font-bold`}
+                onClick={() => {
+                  if (header.filter) {
+                    handleSort(header.key as keyof NodeType);
+                  }
+                }}
               >
                 {header.name}
+                {header.key === currentSortKey ? (sortAsc ? "↑" : "↓") : ""}
               </div>
             );
           })}
@@ -69,7 +95,12 @@ export default function Home() {
                         {node.address}
                       </div>
                       <div className="w-fit justify-center">
-                        <button className="h-5 w-5 bg-[url('/images/copy_white.jpg')] bg-cover hover:bg-gray"></button>
+                        <button
+                          className=" h-5 w-5 hover:bg-gray"
+                          onClick={() => {
+                            navigator.clipboard.writeText(node.address);
+                          }}
+                        ></button>
                       </div>
                     </div>
                     <div className="node-table-cell">
@@ -157,6 +188,15 @@ const MOCK_NODES_TRAINERS = [
     address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
     rank: 2,
   },
+  {
+    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
+    history: ["hist1"],
+    taskContributed: 1,
+    rewardReceived: 50,
+    delegatedCoins: 3,
+    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
+    rank: 3,
+  },
 ];
 const MOCK_NODES_VALIDATORS = [
   {
@@ -177,14 +217,23 @@ const MOCK_NODES_VALIDATORS = [
     address: "18fvFWvmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
     rank: 2,
   },
+  {
+    name: "18fvFWvmAfdfdbHPMVQ3ZcJNmMPRa3zt6sETS",
+    history: ["hist1"],
+    taskContributed: 6,
+    rewardReceived: 230,
+    delegatedCoins: 130,
+    address: "18fvFWvdfdmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
+    rank: 3,
+  },
 ];
 
 const TABLE_HEADERS = [
-  { name: "Rank", filter: true },
-  { name: "Address", filter: false },
-  { name: "Task Contributed", filter: true },
-  { name: "Reward Received", filter: true },
-  { name: "Staked Coins", filter: true },
+  { name: "Rank", filter: true, key: "rank" },
+  { name: "Address", filter: false, key: "address" },
+  { name: "Task Contributed", filter: true, key: "taskContributed" },
+  { name: "Reward Received", filter: true, key: "rewardReceived" },
+  { name: "Staked Coins", filter: true, key: "delegatedCoins" },
 ];
 
 const BUTTON_CONFIG = [

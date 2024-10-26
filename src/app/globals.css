@@ -51,6 +51,9 @@ body {
   @apply bg-zinc-800 text-yellow-500;
 }
 
+.clipboard-button:hover {
+  @apply stroke-FlockBlue;
+}
 
 @font-face {
   font-family: "Gilroy";
