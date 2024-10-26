@@ -17,6 +17,8 @@ export default function Home() {
   const [currentSortKey, setCurrentSortKey] = useState<keyof NodeType>("rank");
   const [sortAsc, setSortAsc] = useState<boolean>(false);
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
+  const [tooltipClipboardContent, setTooltipClipboardContent] =
+    useState<string>(DEFAULT_CLIPBOARD_TOOLTIP);
   useEffect(() => {
     if (currentlySelectedTab.tab === "TRAINER") {
       setNodes(MOCK_NODES_TRAINERS);
@@ -61,8 +63,8 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
-        <div className="h-fit grid grid-cols-5 gap-y-5 m-2 px-5">
+      <div className="flex h-max flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
+        <div className="h-max grid grid-cols-5 gap-y-5 m-2 px-5 overflow-scroll">
           {TABLE_HEADERS.map((header, index) => {
             return (
               <div
@@ -81,37 +83,52 @@ export default function Home() {
               </div>
             );
           })}
-          {nodes
-            ? nodes.map((node, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`col-span-5 min-h-16 max-h-16 text-FlockWhite grid grid-cols-5 hover:bg-yellow-500 hover:text-yellow-500 hover:bg-opacity-50 bg-zinc-800 py-2 text-center justify-center items-center rounded-xl`}
-                    onClick={() => setSelectedNode(node)}
-                  >
-                    <div className="node-table-cell">{node.rank}</div>
-                    <div className="node-table-cell flex hover:bg:zinc-500 flex-row w-32 ">
-                      <div
-                        className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap hover:bg-zinc-500 hover:rounded-lg cursor-pointer hover:text-FlockBlue max-h-full"
-                        onClick={() => {
-                          navigator.clipboard.writeText(node.address);
-                        }}
-                        onMouseEnter={() => setTooltipVisible(true)}
-                        onMouseLeave={() => setTooltipVisible(false)}
-                      >
-                        {node.address}
+          <div className="col-span-5 h-5/6 p-5 grid grid-cols-5 gap-y-5 overflow-x-hidden overflow-y-scroll overscroll-contain">
+            {nodes
+              ? nodes.map((node, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className={`col-span-5 min-h-16 max-h-16 text-FlockWhite grid grid-cols-5 hover:bg-yellow-500
+                         hover:text-yellow-500 hover:bg-opacity-50 bg-zinc-800 py-2 text-center justify-center items-center rounded-xl cursor-pointer`}
+                      onClick={() => setSelectedNode(node)}
+                    >
+                      <div className="node-table-cell">{node.rank}</div>
+                      <div className="node-table-cell flex hover:bg:zinc-500 flex-row w-32 ">
+                        <div
+                          className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap hover:bg-zinc-500 hover:rounded-lg cursor-pointer hover:text-FlockBlue max-h-full"
+                          onClick={() => {
+                            navigator.clipboard.writeText(node.address);
+                            setTooltipClipboardContent("Copied!");
+                            setTimeout(
+                              () =>
+                                setTooltipClipboardContent(
+                                  DEFAULT_CLIPBOARD_TOOLTIP
+                                ),
+                              2000
+                            );
+                          }}
+                          onMouseEnter={() => setTooltipVisible(true)}
+                          onMouseLeave={() => setTooltipVisible(false)}
+                        >
+                          {node.address}
+                        </div>
+                        <div className="w-fit justify-center"></div>
                       </div>
-                      <div className="w-fit justify-center"></div>
+                      <div className="node-table-cell">
+                        {node.taskContributed}
+                      </div>
+                      <div className="node-table-cell">
+                        {node.rewardReceived}
+                      </div>
+                      <div className="node-table-cell">
+                        {node.delegatedCoins}
+                      </div>
                     </div>
-                    <div className="node-table-cell">
-                      {node.taskContributed}
-                    </div>
-                    <div className="node-table-cell">{node.rewardReceived}</div>
-                    <div className="node-table-cell">{node.delegatedCoins}</div>
-                  </div>
-                );
-              })
-            : "Loading..."}
+                  );
+                })
+              : "Loading..."}
+          </div>
         </div>
 
         <div></div>
@@ -119,7 +136,7 @@ export default function Home() {
           <NodeDetailsSidePanel node={selectedNode} />
         </div>
       </div>
-      {tooltipVisible && <Tooltip content="Click to copy to clipboard" />}
+      {tooltipVisible && <Tooltip content={tooltipClipboardContent} />}
     </div>
   );
 }
@@ -127,7 +144,11 @@ export default function Home() {
 const MOCK_NODES_TRAINERS = [
   {
     name: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    history: ["hist1", "hist2", "hist3"],
+    history: [
+      { taskId: 1, status: false, rewardReceived: 10 },
+      { taskId: 5, status: true, rewardReceived: 20 },
+      { taskId: 8, status: true, rewardReceived: 60 },
+    ],
     taskContributed: 10,
     rewardReceived: 40,
     delegatedCoins: 100,
@@ -136,7 +157,7 @@ const MOCK_NODES_TRAINERS = [
   },
   {
     name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: ["hist1"],
+    history: [{ taskId: 4, status: false, rewardReceived: 15 }],
     taskContributed: 15,
     rewardReceived: 60,
     delegatedCoins: 120,
@@ -145,7 +166,7 @@ const MOCK_NODES_TRAINERS = [
   },
   {
     name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: ["hist1"],
+    history: [{ taskId: 7, status: true, rewardReceived: 32 }],
     taskContributed: 1,
     rewardReceived: 50,
     delegatedCoins: 3,
@@ -153,32 +174,37 @@ const MOCK_NODES_TRAINERS = [
     rank: 3,
   },
 ];
+
 const MOCK_NODES_VALIDATORS = [
   {
-    name: "1KQcyhGc5U3K5Q3yEapFdKwhyJ9SkdqQrz",
-    history: ["hist1"],
-    taskContributed: 2,
-    rewardReceived: 10,
-    delegatedCoins: 5,
-    address: "1KQcyhGc5U3K5Q3yEapFdKwhyJ9SkdqQrz",
+    name: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
+    history: [
+      { taskId: 1, status: false, rewardReceived: 10 },
+      { taskId: 5, status: true, rewardReceived: 20 },
+      { taskId: 8, status: true, rewardReceived: 60 },
+    ],
+    taskContributed: 10,
+    rewardReceived: 40,
+    delegatedCoins: 100,
+    address: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
     rank: 1,
   },
   {
-    name: "18fvFWvmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
-    history: ["hist1"],
-    taskContributed: 6,
-    rewardReceived: 20,
-    delegatedCoins: 10,
-    address: "18fvFWvmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
+    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
+    history: [{ taskId: 4, status: false, rewardReceived: 15 }],
+    taskContributed: 15,
+    rewardReceived: 60,
+    delegatedCoins: 120,
+    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
     rank: 2,
   },
   {
-    name: "18fvFWvmAfdfdbHPMVQ3ZcJNmMPRa3zt6sETS",
-    history: ["hist1"],
-    taskContributed: 6,
-    rewardReceived: 230,
-    delegatedCoins: 130,
-    address: "18fvFWvdfdmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
+    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
+    history: [{ taskId: 7, status: true, rewardReceived: 32 }],
+    taskContributed: 1,
+    rewardReceived: 50,
+    delegatedCoins: 3,
+    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
     rank: 3,
   },
 ];
@@ -201,3 +227,5 @@ const BUTTON_CONFIG = [
     label: "Validator Nodes",
   },
 ];
+
+const DEFAULT_CLIPBOARD_TOOLTIP: string = "Click to copy to clipboard";

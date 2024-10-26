@@ -1,5 +1,5 @@
 type NodeType = {
-  address: string
+  address: string;
   name: string;
   history: string[];
   rank: number;
@@ -10,4 +10,10 @@ type NodeType = {
 
 type Tabs = { tab: "TRAINER" | "VALIDATOR" };
 
-export type { NodeType, Tabs };
+type History = {
+  taskId: number;
+  status: boolean;
+  rewardReceived: number;
+};
+
+export type { NodeType, Tabs, History };
