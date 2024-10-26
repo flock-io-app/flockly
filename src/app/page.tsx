@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Header } from "./components/Index";
+import { Header, ListSelector } from "./components/Index";
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState("");
   const [nodes, setNodes] = useState(MOCK_NODES_TRAINERS);
@@ -8,6 +8,7 @@ export default function Home() {
     <div className="flex flex-col h-screen">
       <Header />
       <div>Filters</div>
+      <ListSelector />
       <div className="flex flex-row w-full h-full">
         <table className="w-9/12 table-auto text-center text-FlockBlack ">
           <thead>

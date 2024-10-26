@@ -29,6 +29,11 @@ th {
 .node-row:hover {
   @apply bg-FlockGrey;
 }
+
+.selected {
+  @apply bg-FlockBlue text-FlockWhite rounded-lg outline outline-FlockBlack;
+}
+
 @font-face {
   font-family: "Gilroy";
   src: url("../../public/Gilroy Font/gilroy-Regular.ttf") format("truetype");
