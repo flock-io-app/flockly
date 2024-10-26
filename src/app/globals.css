@@ -18,6 +18,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Gilroy, Arial, Helvetica, sans-serif;
+  margin: 20px;
 }
 th {
   @apply rounded-lg;
@@ -39,6 +40,10 @@ th {
 }
 .radio-button:hover {
   @apply rounded-lg outline outline-FlockBlue;
+}
+
+.node-table-cell {
+  @apply overflow-x-auto;
 }
 
 @font-face {

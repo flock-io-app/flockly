@@ -17,7 +17,7 @@ const RadioButtonGroup: React.FC<RadioButtonGroupProps> = ({
     handler(buttonId);
   };
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row space-x-4">
       {buttonsConfig.map(
         (config: { id: string; label: string }, index: number) => {
           return (
