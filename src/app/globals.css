@@ -34,6 +34,13 @@ th {
   @apply bg-FlockBlue text-FlockWhite rounded-lg outline outline-FlockBlack;
 }
 
+.radio-button {
+  @apply text-FlockBlue;
+}
+.radio-button:hover {
+  @apply rounded-lg outline outline-FlockBlue;
+}
+
 @font-face {
   font-family: "Gilroy";
   src: url("../../public/Gilroy Font/gilroy-Regular.ttf") format("truetype");
