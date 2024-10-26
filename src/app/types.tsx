@@ -1,7 +1,7 @@
 type NodeType = {
   address: string;
   name: string;
-  history: string[];
+  history: object[];
   rank: number;
   taskContributed: number;
   rewardReceived: number;
