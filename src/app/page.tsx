@@ -1,8 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Header, RadioButtonGroup, NodeDetailsSidePanel, Tooltip } from "./components";
+import {
+  Header,
+  RadioButtonGroup,
+  NodeDetailsSidePanel,
+  Tooltip,
+} from "./components";
 import { NodeType, Tabs } from "./types";
-
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeType>();
@@ -119,7 +123,6 @@ export default function Home() {
     </div>
   );
 }
-
 
 const MOCK_NODES_TRAINERS = [
   {
