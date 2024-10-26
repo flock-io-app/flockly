@@ -14,7 +14,7 @@ const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
       <div className="flex flex-row bg-zinc-900 rounded-xl py-2 px-5">
         {node?.address}
       </div>
-      <div className="mb-16">
+      <div className="mb-16" style={{marginLeft: "-40px"}}>
         <RewardChart />
       </div>
 

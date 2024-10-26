@@ -5,7 +5,7 @@ interface TimeRangeSelectorProps {
 }
 
 const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ onSelect }) => {
-  const [selectedOption, setSelectedOption] = useState("3 months");
+  const [selectedOption, setSelectedOption] = useState("12m");
 
   const handleSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;

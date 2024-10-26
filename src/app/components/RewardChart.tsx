@@ -47,14 +47,14 @@ export const RewardChart = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ width: "100%", height: "400px" }}>
+    <div className="flex flex-col" style={{ width: "100%", height: "400px"}}>
       <TimeRangeSelector
         onSelect={(timeStamp) => setSelectedTimeRange(timeStamp)}
       />
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           height={400}
-          width={835}
+          width={870}
           data={data}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
