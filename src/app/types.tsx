@@ -1,4 +1,5 @@
 type NodeType = {
+  address: string
   name: string;
   history: string[];
   rank: number;

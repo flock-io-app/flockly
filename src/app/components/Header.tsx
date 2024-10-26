@@ -1,7 +1,17 @@
 import React from "react";
 
 function Header() {
-  return <div>Header</div>;
+  return <div className="w-full h-16 mb-5 bg-gray-800 rounded-b-lg shadow-lg">
+    <div className="flex justify-between items-center h-full px-5">
+      <div className="flex items-center">
+        <img src="/images/logo.png" alt="Flock Logo" className="h-10 w-10 rounded-full" />
+        <h1 className="text-white text-2xl font-bold ml-3">Flockly</h1>
+      </div>
+      <div className="flex items-center">
+        <button className="h-10 w-10 text-sm font-bold px-4 py-2 rounded-full bg-FlockBlue"></button>
+      </div>
+    </div>
+  </div>;
 }
 
 export default Header;

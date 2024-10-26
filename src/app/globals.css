@@ -18,11 +18,8 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Gilroy, Arial, Helvetica, sans-serif;
-  margin: 20px;
 }
-th {
-  @apply rounded-lg;
-}
+
 .filterable:hover {
   @apply bg-FlockGrey;
 }
@@ -43,7 +40,7 @@ th {
 }
 
 .node-table-cell {
-  @apply overflow-x-auto;
+  @apply w-28;
 }
 
 @font-face {
