@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Header, RadioButtonGroup } from "./components";
+import { Header, RadioButtonGroup, Tooltip } from "./components";
 import { NodeType, Tabs } from "./types";
+
 import dynamic from "next/dynamic";
 
 const RewardChart = dynamic(() => import("./components/RewardChart"), {
@@ -16,7 +17,7 @@ export default function Home() {
   });
   const [currentSortKey, setCurrentSortKey] = useState<keyof NodeType>("rank");
   const [sortAsc, setSortAsc] = useState<boolean>(false);
-
+  const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
   useEffect(() => {
     if (currentlySelectedTab.tab === "TRAINER") {
       setNodes(MOCK_NODES_TRAINERS);
@@ -27,7 +28,7 @@ export default function Home() {
     }
     handleSort(currentSortKey);
   }, [currentlySelectedTab, currentSortKey]);
-  
+
   const radioButtonsHandler = (buttonId: Tabs) => {
     setCurrentlySelectedTab(buttonId);
     setSortAsc(false);
@@ -61,13 +62,13 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-row mt-5 border-t-2 rounded-t-xl bg-zinc-900 h-full pt-10">
-        <div className="grid grid-cols-5 px-5 border-r-2">
+      <div className=" flex flex-row mt-5 border-t-2 rounded-t-xl bg-zinc-900 h-full pt-10">
+        <div className="h-fit grid grid-cols-5 gap-y-5 m-2 px-5">
           {TABLE_HEADERS.map((header, index) => {
             return (
               <div
                 key={index}
-                className={`node-table-cell justify-center items-center text-center ${
+                className={`flex node-table-cell justify-center items-center text-center ${
                   header.filter ? "filterable cursor-pointer" : ""
                 } rounded-lg font-bold`}
                 onClick={() => {
@@ -76,7 +77,7 @@ export default function Home() {
                   }
                 }}
               >
-                {header.name}
+                {header.name}{" "}
                 {header.key === currentSortKey ? (sortAsc ? "↑" : "↓") : ""}
               </div>
             );
@@ -86,22 +87,22 @@ export default function Home() {
                 return (
                   <div
                     key={index}
-                    className={`col-span-5 grid grid-cols-5 hover:bg-zinc-800 py-2 text-center`}
+                    className={`col-span-5 min-h-16 max-h-16 text-FlockWhite grid grid-cols-5 hover:bg-yellow-500 hover:text-yellow-500 hover:bg-opacity-50 bg-zinc-800 py-2 text-center justify-center items-center rounded-xl`}
                     onClick={() => setSelectedNode(node)}
                   >
                     <div className="node-table-cell">{node.rank}</div>
-                    <div className="node-table-cell flex flex-row w-32">
-                      <div className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap">
+                    <div className="node-table-cell flex hover:bg:zinc-500 flex-row w-32 ">
+                      <div
+                        className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap hover:bg-zinc-500 hover:rounded-lg cursor-pointer hover:text-FlockBlue max-h-full"
+                        onClick={() => {
+                          navigator.clipboard.writeText(node.address);
+                        }}
+                        onMouseEnter={() => setTooltipVisible(true)}
+                        onMouseLeave={() => setTooltipVisible(false)}
+                      >
                         {node.address}
                       </div>
-                      <div className="w-fit justify-center">
-                        <button
-                          className=" h-5 w-5 hover:bg-gray"
-                          onClick={() => {
-                            navigator.clipboard.writeText(node.address);
-                          }}
-                        ></button>
-                      </div>
+                      <div className="w-fit justify-center"></div>
                     </div>
                     <div className="node-table-cell">
                       {node.taskContributed}
@@ -115,10 +116,11 @@ export default function Home() {
         </div>
 
         <div></div>
-        <div className="w-3/5">
+        <div className="w-3/5 border-l-2">
           <NodeDetailsSidePanel node={selectedNode} />
         </div>
       </div>
+      {tooltipVisible && <Tooltip content="Click to copy to clipboard" />}
     </div>
   );
 }
@@ -145,9 +147,15 @@ const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
       </div>
 
       <div className="flex flex-row justify-between h-fit w-full">
-        <div className="additional-info-cell">Tasked Contributed: {node?.taskContributed}</div>
-        <div className="additional-info-cell">Reward Received: {node?.rewardReceived}</div>
-        <div className="additional-info-cell">Delegated Coins: {node?.delegatedCoins}</div>
+        <div className="additional-info-cell">
+          Tasked Contributed: {node?.taskContributed}
+        </div>
+        <div className="additional-info-cell">
+          Reward Received: {node?.rewardReceived}
+        </div>
+        <div className="additional-info-cell">
+          Delegated Coins: {node?.delegatedCoins}
+        </div>
       </div>
 
       <div className="flex flex-col">
