@@ -43,6 +43,10 @@ body {
   @apply w-28;
 }
 
+.clipboard-button:hover {
+  @apply stroke-FlockBlue;
+}
+
 @font-face {
   font-family: "Gilroy";
   src: url("../../public/Gilroy Font/gilroy-Regular.ttf") format("truetype");
