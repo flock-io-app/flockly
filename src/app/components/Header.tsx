@@ -3,7 +3,7 @@ import Image from "next/image";
 
 function Header() {
   return (
-    <div className="w-full h-16 mb-5 bg-zinc-800 rounded-b-lg shadow-lg py-5">
+    <div className="w-full h-16 mb-5 bg-zinc-950 rounded-b-lg shadow-lg py-5">
       <div className="flex justify-between items-center h-full px-5">
         <div className="flex items-center">
           <Image
