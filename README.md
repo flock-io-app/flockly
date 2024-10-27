@@ -2,6 +2,8 @@
 
 Node Explorer to support decentralized AI training at Flock.io
 
+[![Demo](assets/flockly.gif)](assets/flockly.mov)
+
 ## About
 
 An explorer for training nodes and validators within the FLock ecosystem. This explorer offers detailed insights, allowing users to click on a training node and view performance metrics, past contributions. To assist delegators in conducting research before committing resources.
