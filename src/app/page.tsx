@@ -61,7 +61,7 @@ export default function Home() {
 
       parsedNode.history.push({
         taskId: parseInt(meta["task_id"]),
-        action: rewardType === "Reward" ? "Claimer" : "Delegator",
+        action: rewardType === "Reward" ? "Claimed" : "Delegated",
         rewardReceived: roundedReward,
         name: meta["name"],
       });

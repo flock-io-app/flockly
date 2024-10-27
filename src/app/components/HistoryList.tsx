@@ -19,8 +19,8 @@ export const HistoryList: React.FC<HistoryProps> = ({ historyList }) => {
         <div className="col-span-4 grid grid-cols-4 justify-center items-center text-center w-full font-bold backdrop-blur-md bg-zinc-700 rounded-xl">
           <div>Task ID</div>
           <div>Name</div>
-          <div>Reward Received</div>
-          <div>Status</div>
+          <div>FML Received</div>
+          <div>Action</div>
         </div>
         <div className="col-span-4 gap-5 grid grid-cols-4 mb-5 overscroll-contain">
           {historyList.map((history, index) => {
@@ -35,7 +35,7 @@ export const HistoryList: React.FC<HistoryProps> = ({ historyList }) => {
                 <div>
                   <div
                     className={
-                      history.action === "Claimer"
+                      history.action === "Claimed"
                         ? "text-green-500"
                         : "text-yellow-500"
                     }
