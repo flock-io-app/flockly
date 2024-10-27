@@ -145,6 +145,8 @@ export default function Home() {
 
   const parseData = (data: any) => {
     const dat = data["nodes"];
+    TRAINER_NODES = [];
+    VALIDATOR_NODES = [];
 
     Object.entries(dat).forEach(([address, task], index) => {
       const [parsedNode, trainer, validator] = parseNodeData(
