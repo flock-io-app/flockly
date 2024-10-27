@@ -1,3 +1,6 @@
+/* eslint-disable no-var */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useEffect, useState } from "react";
 import {
@@ -8,7 +11,6 @@ import {
 } from "./components";
 import { NodeType, Tabs } from "./types";
 import { RewardChart } from "./components";
-import { Area } from "recharts";
 import data from "./aggregated.json";
 
 export default function Home() {
@@ -22,7 +24,9 @@ export default function Home() {
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
   const [tooltipClipboardContent, setTooltipClipboardContent] =
     useState<string>(DEFAULT_CLIPBOARD_TOOLTIP);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [mainGraphData, setMainGraphData] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [detailsGraphData, setDetailsGraphData] = useState<any[]>([]);
 
   const cumSum = (arr: number[]) => {
@@ -49,9 +53,6 @@ export default function Home() {
 
     const nums1 = [0].concat(
       Array.from({ length: 365 }, (_, i) => Math.random() * 25)
-    );
-    const nums2 = [0].concat(
-      Array.from({ length: 365 }, (_, i) => Math.random() * 50)
     );
 
     setDetailsGraphData(
@@ -148,9 +149,9 @@ export default function Home() {
     TRAINER_NODES = [];
     VALIDATOR_NODES = [];
 
-    const trainersDateReward = [];
-    const validatorsDateReward = [];
-    const allDateReward = [];
+    const trainersDateReward: { name: any; date: any; reward: number; }[] = [];
+    const validatorsDateReward: { name: any; date: any; reward: number; }[] = [];
+    const allDateReward: { name: any; date: any; reward: number; }[] = [];
 
     Object.entries(dat).forEach(([address, task], index) => {
       const [parsedNode, trainer, validator] = parseNodeData(
@@ -190,7 +191,7 @@ export default function Home() {
     const tSum = cumSum(trainersDateReward.map((v) => v.reward));
     const vSum = cumSum(validatorsDateReward.map((v) => v.reward));
 
-    const mGData = [];
+    const mGData: React.SetStateAction<any[]> = [];
 
     const allD =
       tSum.length <= vSum.length ? validatorsDateReward : trainersDateReward;
