@@ -9,6 +9,7 @@ import {
 import { NodeType, Tabs } from "./types";
 import { RewardChart } from "./components";
 import { Area } from "recharts";
+import data from "./aggregated.json";
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeType>();
@@ -36,12 +37,13 @@ export default function Home() {
   };
 
   useEffect(() => {
+    parseData(data);
     if (currentlySelectedTab.tab === "TRAINER") {
-      setNodes(MOCK_NODES_TRAINERS);
-      setSelectedNode(MOCK_NODES_TRAINERS[0]);
+      setNodes(TRAINER_NODES);
+      setSelectedNode(TRAINER_NODES[0]);
     } else {
-      setNodes(MOCK_NODES_VALIDATORS);
-      setSelectedNode(MOCK_NODES_VALIDATORS[0]);
+      setNodes(VALIDATOR_NODES);
+      setSelectedNode(VALIDATOR_NODES[0]);
     }
     handleSort(currentSortKey);
 
@@ -89,8 +91,79 @@ export default function Home() {
     });
   };
 
+  const parseNodeData = (nodeData: any, address: string, rank: number) => {
+    let trainer = false;
+    let validator = false;
+    const parsedNode: NodeType = {
+      name: address,
+      address: address,
+      rank: rank,
+      history: [],
+      taskContributed: 0,
+      rewardReceived: 0,
+      delegatedCoins: 0,
+    };
+
+    nodeData.forEach((task: any, index: number) => {
+      const [date, taskType, rewardType, reward, meta] = task;
+
+      const roundedReward = Math.round(parseFloat(reward) * 1000) / 1000;
+
+      parsedNode.history.push({
+        taskId: parseInt(meta["task_id"]),
+        action: rewardType === "Reward" ? "Claimer" : "Delegator",
+        rewardReceived: roundedReward,
+        name: meta["name"],
+      });
+
+      parsedNode.name = meta["name"];
+
+      parsedNode.taskContributed += 1;
+      if (rewardType === "Reward") {
+        parsedNode.rewardReceived += roundedReward;
+      }
+
+      if (rewardType === "Delegate") {
+        parsedNode.delegatedCoins += roundedReward;
+      }
+
+      if (taskType === "Valid") {
+        validator = true;
+      }
+
+      if (taskType === "Train") {
+        trainer = true;
+      }
+    });
+
+    parsedNode.rewardReceived = parseFloat(
+      parsedNode.rewardReceived.toFixed(3)
+    );
+
+    return [parsedNode, trainer, validator];
+  };
+
+  const parseData = (data: any) => {
+    const dat = data["nodes"];
+
+    Object.entries(dat).forEach(([address, task], index) => {
+      const [parsedNode, trainer, validator] = parseNodeData(
+        dat[address],
+        address,
+        index + 1
+      );
+
+      if (trainer) {
+        TRAINER_NODES.push(parsedNode as NodeType);
+      }
+      if (validator) {
+        VALIDATOR_NODES.push(parsedNode as NodeType);
+      }
+    });
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
+    <div className="flex flex-col max-h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
       <div style={{ marginLeft: "-40px" }} className="mb-20 mt-5">
         <RewardChart graphData={mainGraphData} width={1550} secondary={true} />
@@ -103,8 +176,8 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex h-max flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
-        <div className="h-max grid grid-cols-5 gap-y-5 m-2 px-5 overflow-scroll">
+      <div className="flex h-[1200px] pb-10 flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
+        <div className="h-full grid grid-cols-5 gap-y-5 m-2 px-5">
           {TABLE_HEADERS.map((header, index) => {
             return (
               <div
@@ -123,7 +196,7 @@ export default function Home() {
               </div>
             );
           })}
-          <div className="col-span-5 h-5/6 p-5 grid grid-cols-5 gap-y-5 overflow-x-hidden overflow-y-scroll overscroll-contain">
+          <div className="col-span-5 h-full p-5 grid grid-cols-5 gap-y-5 overflow-x-hidden overflow-y-scroll overscroll-contain">
             {nodes
               ? nodes.map((node, index) => {
                   return (
@@ -170,9 +243,7 @@ export default function Home() {
               : "Loading..."}
           </div>
         </div>
-
-        <div></div>
-        <div className="w-3/5">
+        <div className="w-3/5 max-h-full overflow-scroll">
           <NodeDetailsSidePanel
             node={selectedNode}
             graphData={detailsGraphData}
@@ -184,80 +255,12 @@ export default function Home() {
   );
 }
 
-const MOCK_NODES_TRAINERS = [
-  {
-    name: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    history: [
-      { taskId: 1, status: false, rewardReceived: 10 },
-      { taskId: 5, status: true, rewardReceived: 20 },
-      { taskId: 8, status: true, rewardReceived: 60 },
-    ],
-    taskContributed: 10,
-    rewardReceived: 40,
-    delegatedCoins: 100,
-    address: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    rank: 1,
-  },
-  {
-    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: [{ taskId: 4, status: false, rewardReceived: 15 }],
-    taskContributed: 15,
-    rewardReceived: 60,
-    delegatedCoins: 120,
-    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    rank: 2,
-  },
-  {
-    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: [{ taskId: 7, status: true, rewardReceived: 32 }],
-    taskContributed: 1,
-    rewardReceived: 50,
-    delegatedCoins: 3,
-    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    rank: 3,
-  },
-];
-
-const MOCK_NODES_VALIDATORS = [
-  {
-    name: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    history: [
-      { taskId: 1, status: false, rewardReceived: 10 },
-      { taskId: 5, status: true, rewardReceived: 20 },
-      { taskId: 8, status: true, rewardReceived: 60 },
-    ],
-    taskContributed: 10,
-    rewardReceived: 40,
-    delegatedCoins: 100,
-    address: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    rank: 1,
-  },
-  {
-    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: [{ taskId: 4, status: false, rewardReceived: 15 }],
-    taskContributed: 15,
-    rewardReceived: 60,
-    delegatedCoins: 120,
-    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    rank: 2,
-  },
-  {
-    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: [{ taskId: 7, status: true, rewardReceived: 32 }],
-    taskContributed: 1,
-    rewardReceived: 50,
-    delegatedCoins: 3,
-    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    rank: 3,
-  },
-];
-
 const TABLE_HEADERS = [
   { name: "Rank", filter: true, key: "rank" },
   { name: "Address", filter: false, key: "address" },
   { name: "Task Contributed", filter: true, key: "taskContributed" },
   { name: "Reward Received", filter: true, key: "rewardReceived" },
-  { name: "Staked Coins", filter: true, key: "delegatedCoins" },
+  { name: "Delegated Coins", filter: true, key: "delegatedCoins" },
 ];
 
 const BUTTON_CONFIG = [
@@ -272,3 +275,6 @@ const BUTTON_CONFIG = [
 ];
 
 const DEFAULT_CLIPBOARD_TOOLTIP: string = "Click to copy to clipboard";
+
+var TRAINER_NODES: NodeType[] = [];
+var VALIDATOR_NODES: NodeType[] = [];

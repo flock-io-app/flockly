@@ -5,7 +5,7 @@ import RewardChart from "./RewardChart";
 import TimeRangeSelector from "./TimeRangeSelector";
 import NodeDetailsSidePanel from "./NodeDetailsSidePanel";
 import Tooltip from "./Tooltip";
-import History from "./History";
+import HistoryList from "./HistoryList";
 
 export {
   Header,
@@ -15,5 +15,5 @@ export {
   TimeRangeSelector,
   NodeDetailsSidePanel,
   Tooltip,
-  History,
+  HistoryList,
 };

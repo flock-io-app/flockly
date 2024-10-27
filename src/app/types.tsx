@@ -1,7 +1,7 @@
 type NodeType = {
   address: string;
   name: string;
-  history: object[];
+  history: History[];
   rank: number;
   taskContributed: number;
   rewardReceived: number;
@@ -12,7 +12,8 @@ type Tabs = { tab: "TRAINER" | "VALIDATOR" };
 
 type History = {
   taskId: number;
-  status: boolean;
+  name: string;
+  action: string;
   rewardReceived: number;
 };
 
