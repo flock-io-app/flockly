@@ -39,6 +39,61 @@ export default function Home() {
       return acc;
     }, []);
   };
+  const parseNodeData = (nodeData: any, address: string, rank: number) => {
+    let trainer = false;
+    let validator = false;
+    const parsedNode: NodeType = {
+      name: address,
+      address: address,
+      rank: rank,
+      history: [],
+      taskContributed: 0,
+      rewardReceived: 0,
+      delegatedCoins: 0,
+    };
+
+    let taskCont = new Set();
+
+    nodeData.forEach((task: any, index: number) => {
+      const [date, taskType, rewardType, reward, meta] = task;
+
+      const roundedReward = Math.round(parseFloat(reward) * 1000) / 1000;
+
+      parsedNode.history.push({
+        taskId: parseInt(meta["task_id"]),
+        action: rewardType === "Reward" ? "Claimer" : "Delegator",
+        rewardReceived: roundedReward,
+        name: meta["name"],
+      });
+
+      parsedNode.name = meta["name"];
+
+      taskCont.add(meta["task_id"]);
+      if (rewardType === "Reward") {
+        parsedNode.rewardReceived += roundedReward;
+      }
+
+      if (rewardType === "Delegate") {
+        parsedNode.delegatedCoins += roundedReward;
+      }
+
+      if (taskType === "Valid") {
+        validator = true;
+      }
+
+      if (taskType === "Train") {
+        trainer = true;
+      }
+    });
+
+    parsedNode.taskContributed = taskCont.size;
+
+    parsedNode.rewardReceived = parseFloat(
+      parsedNode.rewardReceived.toFixed(3)
+    );
+
+    return [parsedNode, trainer, validator];
+  };
 
   useEffect(() => {
     parseData(data);
@@ -92,56 +147,20 @@ export default function Home() {
     });
   };
 
-  const parseNodeData = (nodeData: any, address: string, rank: number) => {
-    let trainer = false;
-    let validator = false;
-    const parsedNode: NodeType = {
-      name: address,
-      address: address,
-      rank: rank,
-      history: [],
-      taskContributed: 0,
-      rewardReceived: 0,
-      delegatedCoins: 0,
-    };
-
-    nodeData.forEach((task: any, index: number) => {
-      const [date, taskType, rewardType, reward, meta] = task;
-
-      const roundedReward = Math.round(parseFloat(reward) * 1000) / 1000;
-
-      parsedNode.history.push({
-        taskId: parseInt(meta["task_id"]),
-        action: rewardType === "Reward" ? "Claimer" : "Delegator",
-        rewardReceived: roundedReward,
-        name: meta["name"],
-      });
-
-      parsedNode.name = meta["name"];
-
-      parsedNode.taskContributed += 1;
-      if (rewardType === "Reward") {
-        parsedNode.rewardReceived += roundedReward;
-      }
-
-      if (rewardType === "Delegate") {
-        parsedNode.delegatedCoins += roundedReward;
-      }
-
-      if (taskType === "Valid") {
-        validator = true;
-      }
-
-      if (taskType === "Train") {
-        trainer = true;
+  const sortBy = (sortKey: keyof NodeType, asc: boolean) => {
+    let sortedNodes = nodes?.slice();
+    sortedNodes?.sort((a: NodeType, b: NodeType) => {
+      if (asc) {
+        return (b[sortKey] as number) - (a[sortKey] as number);
+      } else {
+        return (a[sortKey] as number) - (b[sortKey] as number);
       }
     });
+    return sortedNodes;
+  };
 
-    parsedNode.rewardReceived = parseFloat(
-      parsedNode.rewardReceived.toFixed(3)
-    );
-
-    return [parsedNode, trainer, validator];
+  const getTopNodes = (sortKey: keyof NodeType) => {
+    return sortBy(sortKey, true)?.slice(0, 5);
   };
 
   const parseData = (data: any) => {
@@ -149,9 +168,9 @@ export default function Home() {
     TRAINER_NODES = [];
     VALIDATOR_NODES = [];
 
-    const trainersDateReward: { name: any; date: any; reward: number; }[] = [];
-    const validatorsDateReward: { name: any; date: any; reward: number; }[] = [];
-    const allDateReward: { name: any; date: any; reward: number; }[] = [];
+    const trainersDateReward: { name: any; date: any; reward: number }[] = [];
+    const validatorsDateReward: { name: any; date: any; reward: number }[] = [];
+    const allDateReward: { name: any; date: any; reward: number }[] = [];
 
     Object.entries(dat).forEach(([address, task], index) => {
       const [parsedNode, trainer, validator] = parseNodeData(
@@ -214,6 +233,24 @@ export default function Home() {
   return (
     <div className="flex flex-col max-h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
+      <div className="font-bold text-yellow-500">
+        🔥 Top Nodes:
+        <div className="flex flex-row gap-5 overflow-hidden scroll-text w-max">
+          {getTopNodes("rewardReceived")?.map((node, index) => {
+            return (
+              <div
+                key={index}
+                className="flex flex-row whitespace-nowrap w-max"
+              >
+                <div className="overflow-ellipsis overflow-hidden">
+                  address: {node.address}
+                </div>
+                <div>{`@reward: ${node.rewardReceived}`}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
       <div style={{ marginLeft: "-30px" }} className="mb-20 mt-5">
         <RewardChart graphData={mainGraphData} width={1530} secondary={true} />
       </div>
