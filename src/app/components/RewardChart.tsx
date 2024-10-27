@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from "react";
 import {
   AreaChart,
@@ -61,6 +62,10 @@ export const RewardChart: React.FC<RewardChartProps> = ({
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (width > 900) {
+    console.log("mydata", data);
   }
 
   return (

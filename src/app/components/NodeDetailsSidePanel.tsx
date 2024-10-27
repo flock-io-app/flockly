@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
 import { NodeType } from "../types";
 import { RewardChart } from ".";
@@ -17,8 +18,8 @@ const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
       <div className="flex flex-row bg-zinc-900 rounded-xl py-2 px-5">
         {node?.address}
       </div>
-      <div className="mb-16" style={{ marginLeft: "-40px" }}>
-        <RewardChart graphData={graphData} />
+      <div className="mb-16" style={{ marginLeft: "-30px" }}>
+        <RewardChart graphData={graphData} width={800} />
       </div>
 
       <div className="flex flex-row justify-between h-fit w-full">

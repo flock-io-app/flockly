@@ -1,12 +1,11 @@
 import React from "react";
-import Image from "next/image";
 
 function Header() {
   return (
     <div className="w-full h-16 mb-5 bg-zinc-950 rounded-b-lg shadow-lg py-5">
       <div className="flex justify-between items-center h-full px-5">
         <div className="flex items-center">
-          <Image
+          <img
             src="/images/logo.png"
             alt="Flock Logo"
             className="h-10 w-10 rounded-full"

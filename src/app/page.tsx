@@ -1,3 +1,6 @@
+/* eslint-disable no-var */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useEffect, useState } from "react";
 import {
@@ -8,7 +11,6 @@ import {
 } from "./components";
 import { NodeType, Tabs } from "./types";
 import { RewardChart } from "./components";
-import { Area } from "recharts";
 import data from "./aggregated.json";
 
 export default function Home() {
@@ -22,7 +24,9 @@ export default function Home() {
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
   const [tooltipClipboardContent, setTooltipClipboardContent] =
     useState<string>(DEFAULT_CLIPBOARD_TOOLTIP);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [mainGraphData, setMainGraphData] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [detailsGraphData, setDetailsGraphData] = useState<any[]>([]);
 
   const cumSum = (arr: number[]) => {
@@ -91,28 +95,6 @@ export default function Home() {
     return [parsedNode, trainer, validator];
   };
 
-  const parseData = (data: any) => {
-    console.log("PARSED DATA");
-    const dat = data["nodes"];
-    TRAINER_NODES = [];
-    VALIDATOR_NODES = [];
-
-    Object.entries(dat).forEach(([address, task], index) => {
-      const [parsedNode, trainer, validator] = parseNodeData(
-        dat[address],
-        address,
-        index + 1
-      );
-
-      if (trainer) {
-        TRAINER_NODES.push(parsedNode as NodeType);
-      }
-      if (validator) {
-        VALIDATOR_NODES.push(parsedNode as NodeType);
-      }
-    });
-  };
-
   useEffect(() => {
     parseData(data);
     if (currentlySelectedTab.tab === "TRAINER") {
@@ -125,10 +107,7 @@ export default function Home() {
     handleSort(currentSortKey);
 
     const nums1 = [0].concat(
-      Array.from({ length: 365 }, (_, i) => Math.exp(Math.random() * 25))
-    );
-    const nums2 = [0].concat(
-      Array.from({ length: 365 }, (_, i) => Math.exp(Math.random() * 25))
+      Array.from({ length: 365 }, (_, i) => Math.random() * 25)
     );
 
     setDetailsGraphData(
@@ -138,13 +117,13 @@ export default function Home() {
       }))
     );
 
-    setMainGraphData(
-      cumSum(nums2).map((i, idx) => ({
-        name: (i + 1).toString(),
-        value: cumSum(nums1)[idx],
-        secondary: i,
-      }))
-    );
+    // setMainGraphData(
+    //   cumSum(nums2).map((i, idx) => ({
+    //     name: (i + 1).toString(),
+    //     value: cumSum(nums1)[idx],
+    //     secondary: i,
+    //   }))
+    // );
   }, [currentlySelectedTab, currentSortKey]);
 
   const radioButtonsHandler = (buttonId: Tabs) => {
@@ -184,6 +163,73 @@ export default function Home() {
     return sortBy(sortKey, true)?.slice(0, 5);
   };
 
+  const parseData = (data: any) => {
+    const dat = data["nodes"];
+    TRAINER_NODES = [];
+    VALIDATOR_NODES = [];
+
+    const trainersDateReward: { name: any; date: any; reward: number }[] = [];
+    const validatorsDateReward: { name: any; date: any; reward: number }[] = [];
+    const allDateReward: { name: any; date: any; reward: number }[] = [];
+
+    Object.entries(dat).forEach(([address, task], index) => {
+      const [parsedNode, trainer, validator] = parseNodeData(
+        dat[address],
+        address,
+        index + 1
+      );
+
+      dat[address].forEach((o: any) => {
+        if (o.length) {
+          const newV = {
+            name: o[0].substring(0, 10),
+            date: o[0].substring(0, 10),
+            reward: Math.round(o[3]),
+          };
+          if (trainer) {
+            trainersDateReward.push(newV);
+          } else if (validator) {
+            validatorsDateReward.push(newV);
+          }
+          allDateReward.push(newV);
+        }
+      });
+
+      if (trainer) {
+        TRAINER_NODES.push(parsedNode as NodeType);
+      }
+      if (validator) {
+        VALIDATOR_NODES.push(parsedNode as NodeType);
+      }
+    });
+
+    console.log("trainersDateReward", trainersDateReward);
+    console.log("validatorsDateReward", validatorsDateReward);
+    console.log("allDateReward", allDateReward);
+
+    const tSum = cumSum(trainersDateReward.map((v) => v.reward));
+    const vSum = cumSum(validatorsDateReward.map((v) => v.reward));
+
+    const mGData: React.SetStateAction<any[]> = [];
+
+    const allD =
+      tSum.length <= vSum.length ? validatorsDateReward : trainersDateReward;
+
+    allD.forEach((v, i) => {
+      console.log("i", i, tSum?.[i] || 0, vSum?.[i] || 0);
+
+      mGData.push({
+        name: i.toString(),
+        value: tSum?.[i] || 0,
+        secondary: vSum?.[i] || 0,
+      });
+    });
+
+    console.log("mainGraphData", mGData);
+
+    setMainGraphData(mGData);
+  };
+
   return (
     <div className="flex flex-col max-h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
@@ -205,8 +251,8 @@ export default function Home() {
           })}
         </div>
       </div>
-      <div style={{ marginLeft: "-40px" }} className="mb-20 mt-5">
-        <RewardChart graphData={mainGraphData} width={1550} secondary={true} />
+      <div style={{ marginLeft: "-30px" }} className="mb-20 mt-5">
+        <RewardChart graphData={mainGraphData} width={1530} secondary={true} />
       </div>
       <div className="flex justify-center w-full my-5">
         <RadioButtonGroup
@@ -283,7 +329,7 @@ export default function Home() {
               : "Loading..."}
           </div>
         </div>
-        <div className="w-3/5 max-h-full overflow-scroll">
+        <div className="w-3/5 max-h-full overflow-y-scroll overflow-x-hidden">
           <NodeDetailsSidePanel
             node={selectedNode}
             graphData={detailsGraphData}
