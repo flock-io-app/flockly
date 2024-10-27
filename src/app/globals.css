@@ -55,6 +55,19 @@ body {
   @apply stroke-FlockBlue;
 }
 
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.scroll-text {
+  animation: scroll-left 20s linear infinite;
+}
+
 @font-face {
   font-family: "Gilroy";
   src: url("../../public/Gilroy Font/gilroy-Regular.ttf") format("truetype");
