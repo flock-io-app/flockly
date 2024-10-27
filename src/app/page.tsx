@@ -48,10 +48,10 @@ export default function Home() {
     handleSort(currentSortKey);
 
     const nums1 = [0].concat(
-      Array.from({ length: 365 }, (_, i) => Math.exp(Math.random() * 25))
+      Array.from({ length: 365 }, (_, i) => Math.random() * 25)
     );
     const nums2 = [0].concat(
-      Array.from({ length: 365 }, (_, i) => Math.exp(Math.random() * 25))
+      Array.from({ length: 365 }, (_, i) => Math.random() * 50)
     );
 
     setDetailsGraphData(
@@ -61,13 +61,13 @@ export default function Home() {
       }))
     );
 
-    setMainGraphData(
-      cumSum(nums2).map((i, idx) => ({
-        name: (i + 1).toString(),
-        value: cumSum(nums1)[idx],
-        secondary: i,
-      }))
-    );
+    // setMainGraphData(
+    //   cumSum(nums2).map((i, idx) => ({
+    //     name: (i + 1).toString(),
+    //     value: cumSum(nums1)[idx],
+    //     secondary: i,
+    //   }))
+    // );
   }, [currentlySelectedTab, currentSortKey]);
 
   const radioButtonsHandler = (buttonId: Tabs) => {
@@ -146,12 +146,32 @@ export default function Home() {
   const parseData = (data: any) => {
     const dat = data["nodes"];
 
+    const trainersDateReward = [];
+    const validatorsDateReward = [];
+    const allDateReward = [];
+
     Object.entries(dat).forEach(([address, task], index) => {
       const [parsedNode, trainer, validator] = parseNodeData(
         dat[address],
         address,
         index + 1
       );
+
+      dat[address].forEach((o: any) => {
+        if (o.length) {
+          const newV = {
+            name: o[0].substring(0, 10),
+            date: o[0].substring(0, 10),
+            reward: Math.round(o[3]),
+          };
+          if (trainer) {
+            trainersDateReward.push(newV);
+          } else if (validator) {
+            validatorsDateReward.push(newV);
+          }
+          allDateReward.push(newV);
+        }
+      });
 
       if (trainer) {
         TRAINER_NODES.push(parsedNode as NodeType);
@@ -160,13 +180,39 @@ export default function Home() {
         VALIDATOR_NODES.push(parsedNode as NodeType);
       }
     });
+
+    console.log("trainersDateReward", trainersDateReward);
+    console.log("validatorsDateReward", validatorsDateReward);
+    console.log("allDateReward", allDateReward);
+
+    const tSum = cumSum(trainersDateReward.map((v) => v.reward));
+    const vSum = cumSum(validatorsDateReward.map((v) => v.reward));
+
+    const mGData = [];
+
+    const allD =
+      tSum.length <= vSum.length ? validatorsDateReward : trainersDateReward;
+
+    allD.forEach((v, i) => {
+      console.log("i", i, tSum?.[i] || 0, vSum?.[i] || 0);
+
+      mGData.push({
+        name: i.toString(),
+        value: tSum?.[i] || 0,
+        secondary: vSum?.[i] || 0,
+      });
+    });
+
+    console.log("mainGraphData", mGData);
+
+    setMainGraphData(mGData);
   };
 
   return (
     <div className="flex flex-col max-h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
-      <div style={{ marginLeft: "-40px" }} className="mb-20 mt-5">
-        <RewardChart graphData={mainGraphData} width={1550} secondary={true} />
+      <div style={{ marginLeft: "-30px" }} className="mb-20 mt-5">
+        <RewardChart graphData={mainGraphData} width={1530} secondary={true} />
       </div>
       <div className="flex justify-center w-full my-5">
         <RadioButtonGroup
@@ -243,7 +289,7 @@ export default function Home() {
               : "Loading..."}
           </div>
         </div>
-        <div className="w-3/5 max-h-full overflow-scroll">
+        <div className="w-3/5 max-h-full overflow-y-scroll overflow-x-hidden">
           <NodeDetailsSidePanel
             node={selectedNode}
             graphData={detailsGraphData}
