@@ -64,10 +64,6 @@ export const RewardChart: React.FC<RewardChartProps> = ({
     return <div>Loading...</div>;
   }
 
-  if (width > 900) {
-    console.log("mydata", data);
-  }
-
   return (
     <div className="flex flex-col" style={{ width: "100%", height: "400px" }}>
       <TimeRangeSelector
