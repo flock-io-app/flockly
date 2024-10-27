@@ -1,0 +1,6 @@
+web3==7.4.0
+moralis==0.1.49
+pandas
+tqdm
+python-dotenv
+beautifulsoup4
