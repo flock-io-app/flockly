@@ -30,8 +30,6 @@ export const RewardChart: React.FC<RewardChartProps> = ({
   const [loading, setLoading] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState("12m");
 
-  console.log("graphData", data);
-
   useEffect(() => {
     const days =
       selectedTimeRange === "3m" ? 90 : selectedTimeRange === "6m" ? 180 : 365;

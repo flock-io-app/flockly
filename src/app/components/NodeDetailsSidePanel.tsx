@@ -1,6 +1,7 @@
 import React from "react";
 import { NodeType } from "../types";
 import { RewardChart } from ".";
+import { HistoryList } from "./index";
 
 interface NodeDetailsSidePanelProps {
   node?: NodeType;
@@ -17,7 +18,7 @@ const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
         {node?.address}
       </div>
       <div className="mb-16" style={{ marginLeft: "-40px" }}>
-        <RewardChart graphData={graphData} /> 
+        <RewardChart graphData={graphData} />
       </div>
 
       <div className="flex flex-row justify-between h-fit w-full">
@@ -32,20 +33,18 @@ const NodeDetailsSidePanel: React.FC<NodeDetailsSidePanelProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col px-5">
-        <div className="flex flex-row justify-between">
-          <div>History</div>
-          <div>Actions</div>
+      <div className="flex flex-col px-5 justify-start">
+        <div className="flex flex-row gap-5 mb-5 font-bold text-xl left-5 text-yellow-500">
+          <div>Past Contributions</div>
         </div>
-        <div className="flex flex-col">
-          {node?.history.map((hist, index) => {
-            return (
-              <div key={index} className="">
-                <div>{hist}</div>
-              </div>
-            );
-          })}
-        </div>
+
+        <HistoryList
+          historyList={
+            node
+              ? node.history
+              : [{ taskId: 0, action: "", rewardReceived: 0, name: "" }]
+          }
+        />
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import {
 import { NodeType, Tabs } from "./types";
 import { RewardChart } from "./components";
 import { Area } from "recharts";
+import data from "./aggregated.json";
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeType>();
@@ -19,6 +20,8 @@ export default function Home() {
   const [currentSortKey, setCurrentSortKey] = useState<keyof NodeType>("rank");
   const [sortAsc, setSortAsc] = useState<boolean>(false);
   const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
+  const [tooltipClipboardContent, setTooltipClipboardContent] =
+    useState<string>(DEFAULT_CLIPBOARD_TOOLTIP);
   const [mainGraphData, setMainGraphData] = useState<any[]>([]);
   const [detailsGraphData, setDetailsGraphData] = useState<any[]>([]);
 
@@ -34,12 +37,13 @@ export default function Home() {
   };
 
   useEffect(() => {
+    parseData(data);
     if (currentlySelectedTab.tab === "TRAINER") {
-      setNodes(MOCK_NODES_TRAINERS);
-      setSelectedNode(MOCK_NODES_TRAINERS[0]);
+      setNodes(TRAINER_NODES);
+      setSelectedNode(TRAINER_NODES[0]);
     } else {
-      setNodes(MOCK_NODES_VALIDATORS);
-      setSelectedNode(MOCK_NODES_VALIDATORS[0]);
+      setNodes(VALIDATOR_NODES);
+      setSelectedNode(VALIDATOR_NODES[0]);
     }
     handleSort(currentSortKey);
 
@@ -87,8 +91,79 @@ export default function Home() {
     });
   };
 
+  const parseNodeData = (nodeData: any, address: string, rank: number) => {
+    let trainer = false;
+    let validator = false;
+    const parsedNode: NodeType = {
+      name: address,
+      address: address,
+      rank: rank,
+      history: [],
+      taskContributed: 0,
+      rewardReceived: 0,
+      delegatedCoins: 0,
+    };
+
+    nodeData.forEach((task: any, index: number) => {
+      const [date, taskType, rewardType, reward, meta] = task;
+
+      const roundedReward = Math.round(parseFloat(reward) * 1000) / 1000;
+
+      parsedNode.history.push({
+        taskId: parseInt(meta["task_id"]),
+        action: rewardType === "Reward" ? "Claimer" : "Delegator",
+        rewardReceived: roundedReward,
+        name: meta["name"],
+      });
+
+      parsedNode.name = meta["name"];
+
+      parsedNode.taskContributed += 1;
+      if (rewardType === "Reward") {
+        parsedNode.rewardReceived += roundedReward;
+      }
+
+      if (rewardType === "Delegate") {
+        parsedNode.delegatedCoins += roundedReward;
+      }
+
+      if (taskType === "Valid") {
+        validator = true;
+      }
+
+      if (taskType === "Train") {
+        trainer = true;
+      }
+    });
+
+    parsedNode.rewardReceived = parseFloat(
+      parsedNode.rewardReceived.toFixed(3)
+    );
+
+    return [parsedNode, trainer, validator];
+  };
+
+  const parseData = (data: any) => {
+    const dat = data["nodes"];
+
+    Object.entries(dat).forEach(([address, task], index) => {
+      const [parsedNode, trainer, validator] = parseNodeData(
+        dat[address],
+        address,
+        index + 1
+      );
+
+      if (trainer) {
+        TRAINER_NODES.push(parsedNode as NodeType);
+      }
+      if (validator) {
+        VALIDATOR_NODES.push(parsedNode as NodeType);
+      }
+    });
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
+    <div className="flex flex-col max-h-screen bg-zinc-900 px-5 overflow-x-hidden overflow-y-scroll">
       <Header />
       <div style={{ marginLeft: "-40px" }} className="mb-20 mt-5">
         <RewardChart graphData={mainGraphData} width={1550} secondary={true} />
@@ -101,8 +176,8 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
-        <div className="h-fit grid grid-cols-5 gap-y-5 m-2 px-5">
+      <div className="flex h-[1200px] pb-10 flex-row my-5 border-t-2 rounded-xl pt-10 bg-gradient-to-t from-zinc-800 to-zinc-950">
+        <div className="h-full grid grid-cols-5 gap-y-5 m-2 px-5">
           {TABLE_HEADERS.map((header, index) => {
             return (
               <div
@@ -121,117 +196,71 @@ export default function Home() {
               </div>
             );
           })}
-          {nodes
-            ? nodes.map((node, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`col-span-5 min-h-16 max-h-16 text-FlockWhite grid grid-cols-5 hover:bg-yellow-500 hover:text-yellow-500 hover:bg-opacity-50 bg-zinc-800 py-2 text-center justify-center items-center rounded-xl`}
-                    onClick={() => setSelectedNode(node)}
-                  >
-                    <div className="node-table-cell">{node.rank}</div>
-                    <div className="node-table-cell flex hover:bg:zinc-500 flex-row w-32 ">
-                      <div
-                        className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap hover:bg-zinc-500 hover:rounded-lg cursor-pointer hover:text-FlockBlue max-h-full"
-                        onClick={() => {
-                          navigator.clipboard.writeText(node.address);
-                        }}
-                        onMouseEnter={() => setTooltipVisible(true)}
-                        onMouseLeave={() => setTooltipVisible(false)}
-                      >
-                        {node.address}
+          <div className="col-span-5 h-full p-5 grid grid-cols-5 gap-y-5 overflow-x-hidden overflow-y-scroll overscroll-contain">
+            {nodes
+              ? nodes.map((node, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className={`col-span-5 min-h-16 max-h-16 text-FlockWhite grid grid-cols-5 hover:bg-yellow-500
+                         hover:text-yellow-500 hover:bg-opacity-50 bg-zinc-800 py-2 text-center justify-center items-center rounded-xl cursor-pointer`}
+                      onClick={() => setSelectedNode(node)}
+                    >
+                      <div className="node-table-cell">{node.rank}</div>
+                      <div className="node-table-cell flex hover:bg:zinc-500 flex-row w-32 ">
+                        <div
+                          className="w-fit overflow-hidden overflow-ellipsis whitespace-nowrap hover:bg-zinc-500 hover:rounded-lg cursor-pointer hover:text-FlockBlue max-h-full"
+                          onClick={() => {
+                            navigator.clipboard.writeText(node.address);
+                            setTooltipClipboardContent("Copied!");
+                            setTimeout(
+                              () =>
+                                setTooltipClipboardContent(
+                                  DEFAULT_CLIPBOARD_TOOLTIP
+                                ),
+                              2000
+                            );
+                          }}
+                          onMouseEnter={() => setTooltipVisible(true)}
+                          onMouseLeave={() => setTooltipVisible(false)}
+                        >
+                          {node.address}
+                        </div>
+                        <div className="w-fit justify-center"></div>
                       </div>
-                      <div className="w-fit justify-center"></div>
+                      <div className="node-table-cell">
+                        {node.taskContributed}
+                      </div>
+                      <div className="node-table-cell">
+                        {node.rewardReceived}
+                      </div>
+                      <div className="node-table-cell">
+                        {node.delegatedCoins}
+                      </div>
                     </div>
-                    <div className="node-table-cell">
-                      {node.taskContributed}
-                    </div>
-                    <div className="node-table-cell">{node.rewardReceived}</div>
-                    <div className="node-table-cell">{node.delegatedCoins}</div>
-                  </div>
-                );
-              })
-            : "Loading..."}
+                  );
+                })
+              : "Loading..."}
+          </div>
         </div>
-
-        <div></div>
-        <div className="w-3/5">
+        <div className="w-3/5 max-h-full overflow-scroll">
           <NodeDetailsSidePanel
             node={selectedNode}
             graphData={detailsGraphData}
           />
         </div>
       </div>
-      {tooltipVisible && <Tooltip content="Click to copy to clipboard" />}
+      {tooltipVisible && <Tooltip content={tooltipClipboardContent} />}
     </div>
   );
 }
-
-const MOCK_NODES_TRAINERS = [
-  {
-    name: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    history: ["hist1", "hist2", "hist3"],
-    taskContributed: 10,
-    rewardReceived: 40,
-    delegatedCoins: 100,
-    address: "1GGqoaTW2QYutbX9wbX5Fkgu4oc26HWdAb",
-    rank: 1,
-  },
-  {
-    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: ["hist1"],
-    taskContributed: 15,
-    rewardReceived: 60,
-    delegatedCoins: 120,
-    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    rank: 2,
-  },
-  {
-    name: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    history: ["hist1"],
-    taskContributed: 1,
-    rewardReceived: 50,
-    delegatedCoins: 3,
-    address: "17QMbkNEZy8PBWbxn1QxYE1h9x2V5FvzS9",
-    rank: 3,
-  },
-];
-const MOCK_NODES_VALIDATORS = [
-  {
-    name: "1KQcyhGc5U3K5Q3yEapFdKwhyJ9SkdqQrz",
-    history: ["hist1"],
-    taskContributed: 2,
-    rewardReceived: 10,
-    delegatedCoins: 5,
-    address: "1KQcyhGc5U3K5Q3yEapFdKwhyJ9SkdqQrz",
-    rank: 1,
-  },
-  {
-    name: "18fvFWvmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
-    history: ["hist1"],
-    taskContributed: 6,
-    rewardReceived: 20,
-    delegatedCoins: 10,
-    address: "18fvFWvmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
-    rank: 2,
-  },
-  {
-    name: "18fvFWvmAfdfdbHPMVQ3ZcJNmMPRa3zt6sETS",
-    history: ["hist1"],
-    taskContributed: 6,
-    rewardReceived: 230,
-    delegatedCoins: 130,
-    address: "18fvFWvdfdmAXbHPMVQ3ZcJNmMPRa3zt6sETS",
-    rank: 3,
-  },
-];
 
 const TABLE_HEADERS = [
   { name: "Rank", filter: true, key: "rank" },
   { name: "Address", filter: false, key: "address" },
   { name: "Task Contributed", filter: true, key: "taskContributed" },
   { name: "Reward Received", filter: true, key: "rewardReceived" },
-  { name: "Staked Coins", filter: true, key: "delegatedCoins" },
+  { name: "Delegated Coins", filter: true, key: "delegatedCoins" },
 ];
 
 const BUTTON_CONFIG = [
@@ -244,3 +273,8 @@ const BUTTON_CONFIG = [
     label: "Validator Nodes",
   },
 ];
+
+const DEFAULT_CLIPBOARD_TOOLTIP: string = "Click to copy to clipboard";
+
+var TRAINER_NODES: NodeType[] = [];
+var VALIDATOR_NODES: NodeType[] = [];
